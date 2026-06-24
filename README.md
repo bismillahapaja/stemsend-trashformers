@@ -182,3 +182,10 @@ npm run dev
 ## License
 
 MIT — Free for educational and non-commercial use.
+
+![Next.js](https://img.shields.io/badge/Next.js-16-black)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)
+![Gemini](https://img.shields.io/badge/Gemini-2.5_Flash-green)
+![Prisma](https://img.shields.io/badge/Prisma-SQLite-purple)
+![License](https://img.shields.io/badge/License-MIT-yellow)
+![LKS AI 2026](https://img.shields.io/badge/LKS_AI-2026-emerald)
