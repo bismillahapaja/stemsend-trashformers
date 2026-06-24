@@ -1,7 +1,12 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next'
 
 const nextConfig: NextConfig = {
-  /* config options here */
-};
+  images: {
+    // Allow local uploaded images to be served without optimization pipeline
+    unoptimized: true,
+  },
+  // Ensures Prisma client is treated as a server-only module
+  serverExternalPackages: ['@prisma/client', 'prisma'],
+}
 
-export default nextConfig;
+export default nextConfig

@@ -1,36 +1,184 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Stemsend Trashformers 🌿♻️
 
-## Getting Started
+**AI-Powered Circular Economy Decision Support System for Schools**
 
-First, run the development server:
+Stemsend Trashformers helps schools identify reusable items from waste and recommends the best circular economy actions using Google Gemini Vision AI.
+
+---
+
+## Features
+
+- 📸 **Image Upload** — Upload photos of waste items (cardboard, plastic, metal, cables, etc.)
+- 🤖 **AI Analysis** — Google Gemini 2.5 Flash Vision identifies item type, condition, and hazard status
+- ⚙️ **Rule Engine** — Maps AI output to actionable recommendations (reuse, repair, donate, dismantle, dispose)
+- 📊 **Dashboard** — Real-time stats with pie/bar charts and CO₂ savings estimates
+- 🗂️ **History** — Paginated log of all past analyses stored in SQLite
+- 🛡️ **Responsible AI** — Ethics & limitations guide for educators
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Framework | Next.js 16 App Router + TypeScript |
+| Styling | Tailwind CSS v4 |
+| AI | Google Gemini 2.5 Flash (Vision) |
+| ORM | Prisma + SQLite |
+| Charts | Recharts |
+| Deployment | Vercel-compatible |
+
+---
+
+## Quick Start
+
+### 1. Clone and install
+
+```bash
+git clone <repo-url>
+cd stemsend-trashformers
+npm install
+```
+
+### 2. Configure environment
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` and add your Gemini API key:
+
+```env
+DATABASE_URL="file:./dev.db"
+GEMINI_API_KEY="your-gemini-api-key-here"
+```
+
+> Get a free Gemini API key at [Google AI Studio](https://aistudio.google.com/)
+
+### 3. Run development server
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+The dev server starts immediately. If you change `prisma/schema.prisma`, run `npm run db:generate` then `npm run db:push` first.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Open [http://localhost:3000](http://localhost:3000)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## Project Structure
 
-To learn more about Next.js, take a look at the following resources:
+```
+stemsend-trashformers/
+├── app/
+│   ├── api/
+│   │   ├── analyze/route.ts     # POST — Gemini AI analysis + rule engine
+│   │   ├── upload/route.ts      # POST — Image file upload
+│   │   ├── history/route.ts     # GET  — Paginated prediction history
+│   │   ├── dashboard/route.ts   # GET  — Aggregated stats
+│   │   └── seed/route.ts        # POST — Load sample data
+│   ├── dashboard/page.tsx       # Dashboard with charts
+│   ├── history/page.tsx         # Prediction history
+│   ├── result/page.tsx          # Individual analysis result
+│   ├── responsible-ai/page.tsx  # Ethics & limitations guide
+│   ├── layout.tsx               # Root layout with Navbar
+│   └── globals.css              # Green-themed design system
+├── components/
+│   ├── Navbar.tsx               # Sticky navigation
+│   ├── UploadZone.tsx           # Drag-and-drop upload
+│   ├── ResultCard.tsx           # Analysis result display
+│   ├── DashboardView.tsx        # Charts & statistics
+│   └── HistoryView.tsx          # Paginated history grid
+├── lib/
+│   ├── gemini.ts                # Gemini Vision API integration
+│   ├── rules.ts                 # Rule engine + CO₂ estimations
+│   └── prisma.ts                # Prisma singleton client
+├── prisma/
+│   ├── schema.prisma            # SQLite Prediction model
+│   └── seed.ts                  # Sample data seeder
+├── data/
+│   └── rules.json               # Item type → action rules
+├── types/
+│   └── index.ts                 # TypeScript type definitions
+└── public/
+    └── uploads/                 # Uploaded images
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+---
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Routes
 
-## Deploy on Vercel
+| Method | Route | Description |
+|--------|-------|-------------|
+| `POST` | `/api/upload` | Upload image, returns `base64` + `url` |
+| `POST` | `/api/analyze` | Analyze with Gemini + apply rules, saves to DB |
+| `GET` | `/api/history` | Paginated prediction history |
+| `GET` | `/api/dashboard` | Aggregated stats + chart data |
+| `POST` | `/api/seed` | Load 15 sample predictions |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Rule Engine
+
+Rules are defined in `data/rules.json`. Each combination of `itemType` × `condition` maps to an `action` and a `recommendation`.
+
+**Actions:** `reuse` · `repair` · `donate` · `dismantle` · `dispose` · `manual_review`
+
+**Override conditions:**
+- If `hazard: true` → forced `manual_review`
+- If `confidence < 40%` → forced `manual_review`
+
+---
+
+## Responsible AI
+
+This application is a **Decision Support System** — not an autonomous decision maker. Key principles:
+
+- AI confidence below 60% triggers a human review warning
+- Hazardous items are always escalated to manual review
+- All recommendations must be validated by school staff
+- See `/responsible-ai` for full ethics documentation
+
+---
+
+## Deployment on Vercel
+
+> ⚠️ SQLite is not supported on Vercel's serverless functions. For production, switch `DATABASE_URL` to a hosted provider (e.g., Turso, PlanetScale, Neon).
+
+```bash
+vercel --prod
+```
+
+Add the following environment variables in Vercel dashboard:
+- `DATABASE_URL`
+- `GEMINI_API_KEY`
+
+---
+
+## Troubleshooting
+
+### `EPERM: operation not permitted` on Windows
+This happens when a stale Node.js process is holding the Prisma DLL file.
+```powershell
+Get-Process -Name node -ErrorAction SilentlyContinue | Stop-Process -Force
+npm run dev
+```
+
+### `API key not valid` from Gemini
+Ensure your `GEMINI_API_KEY` in `.env` is a valid key from [Google AI Studio](https://aistudio.google.com/app/apikey).
+- Keys should start with `AIza...` (39 characters)
+- OAuth tokens (`AQ...`) are **not** API keys — do not use them
+
+### Database not found
+Run `npm run db:push` once to create the SQLite database:
+```bash
+npm run db:push
+npm run dev
+```
+
+---
+
+## License
+
+MIT — Free for educational and non-commercial use.

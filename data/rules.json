@@ -1,0 +1,156 @@
+{
+  "cardboard": {
+    "intact": {
+      "action": "reuse",
+      "recommendation": "Can be used as school project material or handicraft base"
+    },
+    "dirty": {
+      "action": "repair",
+      "recommendation": "Clean the surface and dry before repurposing as art material"
+    },
+    "minor_damage": {
+      "action": "reuse",
+      "recommendation": "Trim damaged sections; remainder can be used for packaging or art projects"
+    },
+    "usable": {
+      "action": "reuse",
+      "recommendation": "Can be used as school project material or handicraft base"
+    },
+    "manual_review": {
+      "action": "manual_review",
+      "recommendation": "Needs inspection to determine if it can be reused or should be recycled"
+    }
+  },
+  "plastic_bottle": {
+    "intact": {
+      "action": "reuse",
+      "recommendation": "Can be reused as a water container or for school science experiments"
+    },
+    "dirty": {
+      "action": "reuse",
+      "recommendation": "Wash thoroughly with soap and water before reusing as a container"
+    },
+    "minor_damage": {
+      "action": "donate",
+      "recommendation": "Donate to community art programs for upcycling projects"
+    },
+    "usable": {
+      "action": "reuse",
+      "recommendation": "Suitable for classroom activities and plant growing experiments"
+    },
+    "manual_review": {
+      "action": "manual_review",
+      "recommendation": "Inspect for chemical residue or structural integrity before reuse"
+    }
+  },
+  "paper": {
+    "intact": {
+      "action": "reuse",
+      "recommendation": "Use the blank side for drafts, note-taking, or art projects"
+    },
+    "dirty": {
+      "action": "dispose",
+      "recommendation": "Place in paper recycling bin for proper recycling"
+    },
+    "minor_damage": {
+      "action": "reuse",
+      "recommendation": "Use remaining clean sections for origami or other crafts"
+    },
+    "usable": {
+      "action": "reuse",
+      "recommendation": "Use the blank side for drafts, note-taking, or art projects"
+    },
+    "manual_review": {
+      "action": "manual_review",
+      "recommendation": "Check for sensitive information before discarding or reusing"
+    }
+  },
+  "metal_can": {
+    "intact": {
+      "action": "reuse",
+      "recommendation": "Clean and repurpose as a pencil holder, plant pot, or storage container"
+    },
+    "dirty": {
+      "action": "repair",
+      "recommendation": "Wash thoroughly and check for rust before repurposing as a planter"
+    },
+    "minor_damage": {
+      "action": "dismantle",
+      "recommendation": "Flatten and send to metal recycling facility"
+    },
+    "usable": {
+      "action": "reuse",
+      "recommendation": "Repurpose as stationery holder or decorative container"
+    },
+    "manual_review": {
+      "action": "manual_review",
+      "recommendation": "Inspect for sharp edges and rust before handling"
+    }
+  },
+  "cable": {
+    "intact": {
+      "action": "reuse",
+      "recommendation": "Test functionality; working cables can be donated to school lab or reused"
+    },
+    "dirty": {
+      "action": "repair",
+      "recommendation": "Clean and test before returning to the electronics lab"
+    },
+    "minor_damage": {
+      "action": "manual_review",
+      "recommendation": "Needs inspection by laboratory staff; do not use until cleared"
+    },
+    "usable": {
+      "action": "reuse",
+      "recommendation": "Test and confirm functionality before returning to lab inventory"
+    },
+    "manual_review": {
+      "action": "manual_review",
+      "recommendation": "Electrical components must be reviewed by a qualified technician"
+    }
+  },
+  "stationery": {
+    "intact": {
+      "action": "donate",
+      "recommendation": "Donate to underprivileged students or community learning centers"
+    },
+    "dirty": {
+      "action": "repair",
+      "recommendation": "Clean items such as rulers and cases; discard dried-out pens"
+    },
+    "minor_damage": {
+      "action": "donate",
+      "recommendation": "Still usable — donate to community programs or younger students"
+    },
+    "usable": {
+      "action": "donate",
+      "recommendation": "Collect with other stationery for donation drives"
+    },
+    "manual_review": {
+      "action": "manual_review",
+      "recommendation": "Assess individual items for usability before donating or discarding"
+    }
+  },
+  "food_container": {
+    "intact": {
+      "action": "reuse",
+      "recommendation": "Wash and sanitize; can be reused for food storage or as a supply organizer"
+    },
+    "dirty": {
+      "action": "reuse",
+      "recommendation": "Wash thoroughly with hot soapy water before reusing"
+    },
+    "minor_damage": {
+      "action": "dispose",
+      "recommendation": "Dispose of cracked food containers to avoid hygiene issues"
+    },
+    "usable": {
+      "action": "reuse",
+      "recommendation": "Reuse as organizer for small items like paper clips, seeds, or beads"
+    },
+    "manual_review": {
+      "action": "manual_review",
+      "recommendation": "Check for chemical leaching (e.g., BPA) before reusing for food"
+    }
+  }
+}
