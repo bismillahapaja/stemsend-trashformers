@@ -4,12 +4,7 @@ import UploadZone from '@/components/UploadZone'
 import Link from 'next/link'
 import { motion } from 'framer-motion'
 
-const STATS = [
-  { value: '500+', label: 'Items Analyzed' },
-  { value: '98 kg', label: 'Waste Prevented' },
-  { value: '12+', label: 'Schools Using' },
-  { value: '6', label: 'Action Types' },
-]
+
 
 const ITEMS = [
   { icon: '📦', label: 'Cardboard' },
@@ -102,20 +97,7 @@ export default function HomePage() {
           </Link>
         </motion.div>
 
-        {/* Stats row */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.4 }}
-          className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-3xl mx-auto pt-4"
-        >
-          {STATS.map((s) => (
-            <div key={s.label} className="glass-card rounded-2xl p-4 text-center">
-              <p className="text-2xl font-bold text-green-700">{s.value}</p>
-              <p className="text-xs text-green-600/60 font-medium mt-0.5">{s.label}</p>
-            </div>
-          ))}
-        </motion.div>
+
       </section>
 
       {/* ─── Upload Zone ─── */}
