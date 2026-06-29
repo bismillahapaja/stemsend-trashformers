@@ -119,6 +119,10 @@
   .animate-pulse-green {
     animation: pulse-green 2s ease-in-out infinite;
   }
+
+  .scroll-mt-nav {
+    scroll-margin-top: 5rem;
+  }
 }
 
 @keyframes float {

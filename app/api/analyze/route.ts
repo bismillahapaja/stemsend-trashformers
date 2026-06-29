@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { analyzeImageWithGemini } from '@/lib/gemini'
-import { applyRule } from '@/lib/rules'
+import { applyRule, calculateReuseScore } from '@/lib/rules'
 import { prisma } from '@/lib/prisma'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
@@ -25,7 +25,6 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       analysis = await analyzeImageWithGemini(base64, mimeType)
     } catch (geminiError) {
       const msg = geminiError instanceof Error ? geminiError.message : 'Gemini API error'
-      // Return a specific status for API key issues vs other errors
       const isKeyError = msg.includes('GEMINI_API_KEY') || msg.includes('API key not valid') || msg.includes('API_KEY_INVALID')
       return NextResponse.json(
         { error: isKeyError ? `AI service unavailable: ${msg}` : msg },
@@ -50,6 +49,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         `AI confidence is low (${analysis.confidence}%). Human review is required before any action.`
     }
 
+    // Calculate reuse score
+    const reuseScore = calculateReuseScore(
+      analysis.type,
+      analysis.condition,
+      analysis.confidence,
+      analysis.hazard
+    )
+
     // Persist to database
     const prediction = await prisma.prediction.create({
       data: {
@@ -58,6 +65,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         condition: analysis.condition,
         confidence: analysis.confidence,
         hazard: analysis.hazard,
+        reuseScore,
         action: finalAction,
         recommendation: finalRecommendation,
       },
@@ -70,14 +78,14 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       condition: prediction.condition,
       confidence: prediction.confidence,
       hazard: prediction.hazard,
+      reuseScore: prediction.reuseScore,
       action: prediction.action,
       recommendation: prediction.recommendation,
       createdAt: prediction.createdAt.toISOString(),
     })
   } catch (error) {
     console.error('Analyze error:', error)
-    const message =
-      error instanceof Error ? error.message : 'Analysis failed'
+    const message = error instanceof Error ? error.message : 'Analysis failed'
     return NextResponse.json({ error: message }, { status: 500 })
   }
 }

@@ -5,9 +5,10 @@ import type { ItemType } from '@/types'
 
 export async function GET(_request: NextRequest): Promise<NextResponse> {
   try {
-    const predictions = await prisma.prediction.findMany({
-      orderBy: { createdAt: 'desc' },
-    })
+    const [predictions, feedbackCount] = await Promise.all([
+      prisma.prediction.findMany({ orderBy: { createdAt: 'desc' } }),
+      prisma.feedback.count(),
+    ])
 
     const actionCounts = {
       reuse: 0,
@@ -69,6 +70,7 @@ export async function GET(_request: NextRequest): Promise<NextResponse> {
       disposeCount: actionCounts.dispose,
       manualReviewCount: actionCounts.manual_review,
       totalItems: predictions.length,
+      feedbackCount,
       estimatedWasteKg: parseFloat(estimatedWasteKg.toFixed(2)),
       estimatedCO2Kg: parseFloat(estimatedCO2Kg.toFixed(2)),
       byType,

@@ -2,32 +2,52 @@ import { PrismaClient } from '@prisma/client'
 
 const prisma = new PrismaClient()
 
+// Weight-based reuse score calculation (same as lib/rules.ts)
+function calcScore(itemType: string, condition: string, confidence: number, hazard: boolean): number {
+  if (hazard) return Math.min(20, Math.round(confidence * 0.15))
+  const conditionScore: Record<string, number> = {
+    intact: 95, usable: 80, dirty: 72, minor_damage: 55, manual_review: 30,
+  }
+  const typeMult: Record<string, number> = {
+    cardboard: 1.0, plastic_bottle: 0.95, paper: 1.0, metal_can: 0.9,
+    cable: 0.7, stationery: 1.0, food_container: 0.85,
+  }
+  const base = conditionScore[condition] ?? 50
+  const mult = typeMult[itemType] ?? 1.0
+  const bonus = (confidence - 50) * 0.1
+  return Math.min(100, Math.max(0, Math.round(base * mult + bonus)))
+}
+
+const sampleData = [
+  { imageUrl: '/uploads/sample1.jpg',  itemType: 'cardboard',      condition: 'intact',       confidence: 92, hazard: false, action: 'reuse',         recommendation: 'Can be used as school project material or handicraft base' },
+  { imageUrl: '/uploads/sample2.jpg',  itemType: 'plastic_bottle', condition: 'dirty',        confidence: 88, hazard: false, action: 'reuse',         recommendation: 'Wash thoroughly with soap and water before reusing as a container' },
+  { imageUrl: '/uploads/sample3.jpg',  itemType: 'paper',          condition: 'usable',       confidence: 95, hazard: false, action: 'reuse',         recommendation: 'Use the blank side for drafts, note-taking, or art projects' },
+  { imageUrl: '/uploads/sample4.jpg',  itemType: 'metal_can',      condition: 'intact',       confidence: 90, hazard: false, action: 'reuse',         recommendation: 'Clean and repurpose as a pencil holder, plant pot, or storage container' },
+  { imageUrl: '/uploads/sample5.jpg',  itemType: 'cable',          condition: 'minor_damage', confidence: 75, hazard: true,  action: 'manual_review', recommendation: 'This item has been flagged as potentially hazardous. Do not reuse without professional inspection.' },
+  { imageUrl: '/uploads/sample6.jpg',  itemType: 'stationery',     condition: 'intact',       confidence: 93, hazard: false, action: 'donate',        recommendation: 'Donate to underprivileged students or community learning centers' },
+  { imageUrl: '/uploads/sample7.jpg',  itemType: 'food_container', condition: 'dirty',        confidence: 85, hazard: false, action: 'reuse',         recommendation: 'Wash thoroughly with hot soapy water before reusing' },
+  { imageUrl: '/uploads/sample8.jpg',  itemType: 'cardboard',      condition: 'minor_damage', confidence: 80, hazard: false, action: 'reuse',         recommendation: 'Trim damaged sections; remainder can be used for packaging or art projects' },
+  { imageUrl: '/uploads/sample9.jpg',  itemType: 'plastic_bottle', condition: 'intact',       confidence: 97, hazard: false, action: 'reuse',         recommendation: 'Can be reused as a water container or for school science experiments' },
+  { imageUrl: '/uploads/sample10.jpg', itemType: 'paper',          condition: 'dirty',        confidence: 89, hazard: false, action: 'dispose',       recommendation: 'Place in paper recycling bin for proper recycling' },
+  { imageUrl: '/uploads/sample11.jpg', itemType: 'metal_can',      condition: 'minor_damage', confidence: 72, hazard: false, action: 'dismantle',     recommendation: 'Flatten and send to metal recycling facility' },
+  { imageUrl: '/uploads/sample12.jpg', itemType: 'stationery',     condition: 'usable',       confidence: 91, hazard: false, action: 'donate',        recommendation: 'Collect with other stationery for donation drives' },
+  { imageUrl: '/uploads/sample13.jpg', itemType: 'food_container', condition: 'intact',       confidence: 94, hazard: false, action: 'reuse',         recommendation: 'Wash and sanitize; can be reused for food storage or as a supply organizer' },
+  { imageUrl: '/uploads/sample14.jpg', itemType: 'cable',          condition: 'intact',       confidence: 86, hazard: false, action: 'reuse',         recommendation: 'Test functionality; working cables can be donated to school lab or reused' },
+  { imageUrl: '/uploads/sample15.jpg', itemType: 'cardboard',      condition: 'usable',       confidence: 88, hazard: false, action: 'reuse',         recommendation: 'Can be used as school project material or handicraft base' },
+]
+
 async function main() {
   console.log('🌱 Seeding database with sample data...')
 
-  const sampleData = [
-    { imageUrl: '/uploads/sample1.jpg', itemType: 'cardboard',       condition: 'intact',       confidence: 92, hazard: false, action: 'reuse',         recommendation: 'Can be used as school project material or handicraft base' },
-    { imageUrl: '/uploads/sample2.jpg', itemType: 'plastic_bottle',  condition: 'dirty',        confidence: 88, hazard: false, action: 'reuse',         recommendation: 'Wash thoroughly with soap and water before reusing as a container' },
-    { imageUrl: '/uploads/sample3.jpg', itemType: 'paper',           condition: 'usable',       confidence: 95, hazard: false, action: 'reuse',         recommendation: 'Use the blank side for drafts, note-taking, or art projects' },
-    { imageUrl: '/uploads/sample4.jpg', itemType: 'metal_can',       condition: 'intact',       confidence: 90, hazard: false, action: 'reuse',         recommendation: 'Clean and repurpose as a pencil holder, plant pot, or storage container' },
-    { imageUrl: '/uploads/sample5.jpg', itemType: 'cable',           condition: 'minor_damage', confidence: 75, hazard: true,  action: 'manual_review', recommendation: 'This item has been flagged as potentially hazardous. Do not reuse without professional inspection.' },
-    { imageUrl: '/uploads/sample6.jpg', itemType: 'stationery',      condition: 'intact',       confidence: 93, hazard: false, action: 'donate',        recommendation: 'Donate to underprivileged students or community learning centers' },
-    { imageUrl: '/uploads/sample7.jpg', itemType: 'food_container',  condition: 'dirty',        confidence: 85, hazard: false, action: 'reuse',         recommendation: 'Wash thoroughly with hot soapy water before reusing' },
-    { imageUrl: '/uploads/sample8.jpg', itemType: 'cardboard',       condition: 'minor_damage', confidence: 80, hazard: false, action: 'reuse',         recommendation: 'Trim damaged sections; remainder can be used for packaging or art projects' },
-    { imageUrl: '/uploads/sample9.jpg', itemType: 'plastic_bottle',  condition: 'intact',       confidence: 97, hazard: false, action: 'reuse',         recommendation: 'Can be reused as a water container or for school science experiments' },
-    { imageUrl: '/uploads/sample10.jpg',itemType: 'paper',           condition: 'dirty',        confidence: 89, hazard: false, action: 'dispose',       recommendation: 'Place in paper recycling bin for proper recycling' },
-    { imageUrl: '/uploads/sample11.jpg',itemType: 'metal_can',       condition: 'minor_damage', confidence: 72, hazard: false, action: 'dismantle',     recommendation: 'Flatten and send to metal recycling facility' },
-    { imageUrl: '/uploads/sample12.jpg',itemType: 'stationery',      condition: 'usable',       confidence: 91, hazard: false, action: 'donate',        recommendation: 'Collect with other stationery for donation drives' },
-    { imageUrl: '/uploads/sample13.jpg',itemType: 'food_container',  condition: 'intact',       confidence: 94, hazard: false, action: 'reuse',         recommendation: 'Wash and sanitize; can be reused for food storage or as a supply organizer' },
-    { imageUrl: '/uploads/sample14.jpg',itemType: 'cable',           condition: 'intact',       confidence: 86, hazard: false, action: 'reuse',         recommendation: 'Test functionality; working cables can be donated to school lab or reused' },
-    { imageUrl: '/uploads/sample15.jpg',itemType: 'cardboard',       condition: 'usable',       confidence: 88, hazard: false, action: 'reuse',         recommendation: 'Can be used as school project material or handicraft base' },
-  ]
+  await prisma.feedback.deleteMany()
+  await prisma.prediction.deleteMany()
 
   for (const item of sampleData) {
-    await prisma.prediction.upsert({
-      where: { id: sampleData.indexOf(item) + 1 },
-      update: {},
-      create: item,
+    await prisma.prediction.create({
+      data: {
+        ...item,
+        reuseScore: calcScore(item.itemType, item.condition, item.confidence, item.hazard),
+      },
     })
   }
 

@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import {
   PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid,
-  Tooltip, Legend, ResponsiveContainer,
+  Tooltip, ResponsiveContainer,
 } from 'recharts'
 import type { DashboardStats } from '@/types'
 import Link from 'next/link'
@@ -22,25 +22,23 @@ const TYPE_COLORS = [
 ]
 
 function StatCard({
-  label,
-  value,
-  icon,
-  color,
-  unit = '',
+  label, value, icon, color, unit = '', pulse = false,
 }: {
-  label: string
-  value: number | string
-  icon: string
-  color: string
-  unit?: string
+  label: string; value: number | string; icon: string; color: string; unit?: string; pulse?: boolean
 }) {
   return (
     <div className="glass-card rounded-2xl p-5 flex items-center gap-4 hover:-translate-y-1 transition-transform duration-200">
       <div
-        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0"
+        className="w-12 h-12 rounded-xl flex items-center justify-center text-2xl flex-shrink-0 relative"
         style={{ background: `${color}18` }}
       >
         {icon}
+        {pulse && (
+          <span
+            className="absolute -top-1 -right-1 w-3 h-3 rounded-full border-2 border-white"
+            style={{ background: color, animation: 'pulse-green 2s ease-in-out infinite' }}
+          />
+        )}
       </div>
       <div>
         <p className="text-sm text-green-700/60 font-medium">{label}</p>
@@ -95,7 +93,7 @@ export default function DashboardView() {
 
   return (
     <div className="space-y-6">
-      {/* Seed button for empty state */}
+      {/* Empty state */}
       {isEmpty && (
         <div className="glass-card rounded-2xl p-8 text-center space-y-4">
           <div className="text-5xl animate-float">🌱</div>
@@ -122,12 +120,42 @@ export default function DashboardView() {
         </div>
       )}
 
-      {/* Stat cards */}
+      {/* AI Feedback Banner */}
+      {stats.feedbackCount > 0 && (
+        <div className="rounded-2xl bg-gradient-to-r from-emerald-500 to-green-600 p-4 flex items-center gap-4 shadow-lg shadow-green-200">
+          <div className="text-3xl">🧠</div>
+          <div className="flex-1">
+            <p className="text-white font-bold text-sm">AI Improved Through Human Feedback</p>
+            <p className="text-white/70 text-xs">
+              {stats.feedbackCount} teacher correction{stats.feedbackCount !== 1 ? 's' : ''} recorded — the system learns from your expertise.
+            </p>
+          </div>
+          <div className="text-white/90 text-2xl font-bold flex-shrink-0">
+            {stats.feedbackCount}
+            <span className="text-sm font-normal text-white/60 ml-1">corrections</span>
+          </div>
+        </div>
+      )}
+
+      {/* Action stat cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatCard label="Reuse" value={stats.reuseCount} icon="♻️" color="#22c55e" />
         <StatCard label="Repair" value={stats.repairCount} icon="🔧" color="#f59e0b" />
         <StatCard label="Donate" value={stats.donateCount} icon="🎁" color="#3b82f6" />
         <StatCard label="Dispose" value={stats.disposeCount} icon="🗑️" color="#ef4444" />
+      </div>
+
+      {/* Summary row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <StatCard label="Total Items" value={stats.totalItems} icon="📦" color="#14532d" />
+        <StatCard label="Manual Review" value={stats.manualReviewCount} icon="👁️" color="#64748b" />
+        <StatCard label="Feedback Given" value={stats.feedbackCount} icon="🧠" color="#8b5cf6" pulse={stats.feedbackCount > 0} />
+        <StatCard
+          label="Items Saved"
+          value={stats.reuseCount + stats.repairCount + stats.donateCount}
+          icon="🌱"
+          color="#16a34a"
+        />
       </div>
 
       {/* Environmental impact */}
@@ -159,7 +187,7 @@ export default function DashboardView() {
       {/* Charts */}
       {!isEmpty && (
         <div className="grid md:grid-cols-2 gap-6">
-          {/* Pie chart - by action */}
+          {/* Pie chart */}
           <div className="glass-card rounded-2xl p-5">
             <h3 className="font-bold text-green-800 mb-4">Actions Distribution</h3>
             <ResponsiveContainer width="100%" height={240}>
@@ -172,9 +200,7 @@ export default function DashboardView() {
                   outerRadius={90}
                   paddingAngle={3}
                   dataKey="value"
-                  label={({ name, percent }) =>
-                    `${name} ${(percent * 100).toFixed(0)}%`
-                  }
+                  label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
                   labelLine={false}
                 >
                   {stats.byAction.map((entry, index) => (
@@ -185,41 +211,21 @@ export default function DashboardView() {
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{
-                    borderRadius: '12px',
-                    border: '1px solid #bbf7d0',
-                    fontSize: '13px',
-                  }}
+                  contentStyle={{ borderRadius: '12px', border: '1px solid #bbf7d0', fontSize: '13px' }}
                 />
               </PieChart>
             </ResponsiveContainer>
           </div>
 
-          {/* Bar chart - by item type */}
+          {/* Bar chart */}
           <div className="glass-card rounded-2xl p-5">
             <h3 className="font-bold text-green-800 mb-4">Items by Type</h3>
             <ResponsiveContainer width="100%" height={240}>
               <BarChart data={stats.byType} margin={{ top: 0, right: 0, left: -20, bottom: 0 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f0fdf4" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fontSize: 10, fill: '#15803d' }}
-                  tickLine={false}
-                  axisLine={false}
-                />
-                <YAxis
-                  tick={{ fontSize: 11, fill: '#15803d' }}
-                  tickLine={false}
-                  axisLine={false}
-                  allowDecimals={false}
-                />
-                <Tooltip
-                  contentStyle={{
-                    borderRadius: '12px',
-                    border: '1px solid #bbf7d0',
-                    fontSize: '13px',
-                  }}
-                />
+                <XAxis dataKey="name" tick={{ fontSize: 10, fill: '#15803d' }} tickLine={false} axisLine={false} />
+                <YAxis tick={{ fontSize: 11, fill: '#15803d' }} tickLine={false} axisLine={false} allowDecimals={false} />
+                <Tooltip contentStyle={{ borderRadius: '12px', border: '1px solid #bbf7d0', fontSize: '13px' }} />
                 <Bar dataKey="value" name="Count" radius={[6, 6, 0, 0]}>
                   {stats.byType.map((_, index) => (
                     <Cell key={`bar-${index}`} fill={TYPE_COLORS[index % TYPE_COLORS.length]} />
@@ -241,25 +247,51 @@ export default function DashboardView() {
             </Link>
           </div>
           <div className="divide-y divide-green-50">
-            {stats.recent.map((item) => (
-              <div key={item.id} className="px-5 py-3 flex items-center gap-4 hover:bg-green-50/50 transition-colors">
-                <div
-                  className="w-2 h-2 rounded-full flex-shrink-0"
-                  style={{ background: ACTION_COLORS[item.action.charAt(0).toUpperCase() + item.action.slice(1).replace('_', ' ')] ?? '#64748b' }}
-                />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-green-800 truncate">
-                    {item.itemType.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
-                    {' — '}
-                    <span className="text-green-600/70">{item.condition}</span>
-                  </p>
+            {stats.recent.map((item) => {
+              const actionLabel = item.action.charAt(0).toUpperCase() + item.action.slice(1).replace('_', ' ')
+              const dotColor = ACTION_COLORS[actionLabel] ?? '#64748b'
+              return (
+                <div key={item.id} className="px-5 py-3 flex items-center gap-4 hover:bg-green-50/50 transition-colors">
+                  <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: dotColor }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-green-800 truncate">
+                      {item.itemType.split('_').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                      {' — '}
+                      <span className="text-green-600/70">{item.condition}</span>
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    {typeof item.reuseScore === 'number' && (
+                      <span className="text-xs font-semibold text-green-700 bg-green-100 px-2 py-0.5 rounded-full">
+                        {item.reuseScore}pts
+                      </span>
+                    )}
+                    <span className="text-xs font-medium text-green-600/60">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </span>
+                    <Link
+                      href={`/passport/${item.id}`}
+                      className="text-xs text-green-600 hover:text-green-700 font-medium"
+                    >
+                      🌿
+                    </Link>
+                  </div>
                 </div>
-                <span className="text-xs font-medium text-green-600/60 flex-shrink-0">
-                  {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              </div>
-            ))}
+              )
+            })}
           </div>
+        </div>
+      )}
+
+      {/* Refresh */}
+      {!isEmpty && (
+        <div className="text-center">
+          <button
+            onClick={fetchStats}
+            className="text-sm text-green-600 hover:text-green-700 font-medium border border-green-200 px-4 py-2 rounded-xl hover:bg-green-50 transition-colors"
+          >
+            🔄 Refresh Data
+          </button>
         </div>
       )}
     </div>

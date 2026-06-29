@@ -41,8 +41,17 @@ export interface AnalysisResult {
   condition: Condition
   confidence: number
   hazard: boolean
+  reuseScore: number
   action: Action
   recommendation: string
+  createdAt: string
+}
+
+export interface FeedbackRecord {
+  id: number
+  predictionId: number
+  aiAction: Action
+  humanAction: Action
   createdAt: string
 }
 
@@ -54,9 +63,25 @@ export interface DashboardStats {
   disposeCount: number
   manualReviewCount: number
   totalItems: number
+  feedbackCount: number
   estimatedWasteKg: number
   estimatedCO2Kg: number
   byType: { name: string; value: number }[]
   byAction: { name: string; value: number }[]
   recent: AnalysisResult[]
+}
+
+export interface PassportData {
+  passportId: string
+  id: number
+  imageUrl: string
+  itemType: ItemType
+  condition: Condition
+  action: Action
+  reuseScore: number
+  confidence: number
+  hazard: boolean
+  recommendation: string
+  createdAt: string
+  location: string
 }

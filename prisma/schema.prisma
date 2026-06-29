@@ -11,13 +11,24 @@ datasource db {
 }
 
 model Prediction {
-  id             Int      @id @default(autoincrement())
+  id             Int        @id @default(autoincrement())
   imageUrl       String
   itemType       String
   condition      String
   confidence     Float
-  hazard         Boolean  @default(false)
+  hazard         Boolean    @default(false)
+  reuseScore     Float      @default(0)
   action         String
   recommendation String
-  createdAt      DateTime @default(now())
+  createdAt      DateTime   @default(now())
+  feedbacks      Feedback[]
+}
+
+model Feedback {
+  id           Int        @id @default(autoincrement())
+  predictionId Int
+  aiAction     String
+  humanAction  String
+  createdAt    DateTime   @default(now())
+  prediction   Prediction @relation(fields: [predictionId], references: [id], onDelete: Cascade)
 }

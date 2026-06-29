@@ -27,6 +27,26 @@ const CO2_PER_KG: Record<ItemType, number> = {
   food_container: 2.0,
 }
 
+// Base reuse scores per condition
+const CONDITION_SCORE: Record<Condition, number> = {
+  intact: 95,
+  usable: 80,
+  dirty: 72,
+  minor_damage: 55,
+  manual_review: 30,
+}
+
+// Multiplier per item type (cables are harder to reuse safely)
+const TYPE_MULTIPLIER: Record<ItemType, number> = {
+  cardboard: 1.0,
+  plastic_bottle: 0.95,
+  paper: 1.0,
+  metal_can: 0.9,
+  cable: 0.7,
+  stationery: 1.0,
+  food_container: 0.85,
+}
+
 export function applyRule(itemType: ItemType, condition: Condition): RuleResult {
   const typeRules = rulesMap[itemType]
   if (typeRules) {
@@ -44,6 +64,22 @@ export function applyRule(itemType: ItemType, condition: Condition): RuleResult 
     recommendation:
       'This item requires human inspection before a decision can be made.',
   }
+}
+
+export function calculateReuseScore(
+  itemType: ItemType,
+  condition: Condition,
+  confidence: number,
+  hazard: boolean
+): number {
+  if (hazard) return Math.min(20, Math.round(confidence * 0.15))
+
+  const base = CONDITION_SCORE[condition] ?? 50
+  const typeMult = TYPE_MULTIPLIER[itemType] ?? 1.0
+  const confidenceBonus = (confidence - 50) * 0.1 // -5 to +5 range
+
+  const raw = base * typeMult + confidenceBonus
+  return Math.min(100, Math.max(0, Math.round(raw)))
 }
 
 export function estimateWasteSaved(itemType: ItemType): number {
@@ -102,4 +138,15 @@ export function getActionColor(action: string): string {
     manual_review: '#64748b',
   }
   return colors[action] ?? '#64748b'
+}
+
+export function getReuseScoreLabel(score: number): {
+  label: string
+  color: string
+  bg: string
+} {
+  if (score >= 80) return { label: 'Excellent', color: '#15803d', bg: '#dcfce7' }
+  if (score >= 65) return { label: 'Good', color: '#16a34a', bg: '#f0fdf4' }
+  if (score >= 45) return { label: 'Fair', color: '#d97706', bg: '#fef3c7' }
+  return { label: 'Poor', color: '#dc2626', bg: '#fee2e2' }
 }
