@@ -6,8 +6,12 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = env("DATABASE_URL")
+  // Supabase PostgreSQL for production
+  // Use DATABASE_URL (Transaction pooler) for normal queries
+  // Use DIRECT_URL (Direct connection) for migrations
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model Prediction {

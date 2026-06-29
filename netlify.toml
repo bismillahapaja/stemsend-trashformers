@@ -1,0 +1,22 @@
+# Netlify configuration for Next.js (App Router)
+# Uses the official @netlify/plugin-nextjs adapter
+
+[build]
+  command   = "npx prisma generate && next build"
+  publish   = ".next"
+
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NPM_FLAGS    = "--legacy-peer-deps"
+
+# Redirect HTTP → HTTPS
+[[redirects]]
+  from   = "http://*"
+  to     = "https://:splat"
+  status = 301
+
+# API routes are handled by Netlify Functions via the plugin
+# No manual rewrite rules needed for Next.js App Router
