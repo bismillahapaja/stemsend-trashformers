@@ -5,6 +5,10 @@ import Image from 'next/image'
 import Link from 'next/link'
 import type { AnalysisResult, ItemType } from '@/types'
 import { formatAction, formatCondition, formatItemType, getActionColor, getReuseScoreLabel } from '@/lib/rules'
+import {
+  Inbox, Camera, SearchX, Search, ChevronLeft, ChevronRight,
+  AlertTriangle, CheckCircle, FileText,
+} from 'lucide-react'
 
 const ITEM_TYPES: ItemType[] = [
   'cardboard', 'plastic_bottle', 'paper', 'metal_can', 'cable', 'stationery', 'food_container',
@@ -25,14 +29,14 @@ function ReuseScoreMini({ score }: { score: number }) {
   const { label, color } = getReuseScoreLabel(score)
   return (
     <div className="flex items-center gap-1.5">
-      <div className="h-1.5 w-16 bg-green-100 rounded-full overflow-hidden">
+      <div className="h-1.5 w-16 rounded-full overflow-hidden" style={{ background: 'var(--slate-200)' }}>
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{ width: `${score}%`, background: color }}
         />
       </div>
       <span className="text-xs font-bold" style={{ color }}>{score}</span>
-      <span className="text-xs text-green-600/50 hidden sm:inline">— {label}</span>
+      <span className="text-xs hidden sm:inline" style={{ color: 'var(--slate-400)' }}>— {label}</span>
     </div>
   )
 }
@@ -79,24 +83,38 @@ export default function HistoryView() {
 
   if (loading && items.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 gap-4">
-        <div className="w-10 h-10 border-4 border-green-200 border-t-green-600 rounded-full animate-spin" />
-        <p className="text-green-700 font-medium text-sm">Loading history...</p>
+      <div className="flex flex-col items-center justify-center py-24 gap-4">
+        <div
+          className="w-10 h-10 border-[3px] rounded-full animate-spin-slow"
+          style={{ borderColor: 'var(--slate-200)', borderTopColor: 'var(--emerald-700)' }}
+        />
+        <p className="font-medium text-sm" style={{ color: 'var(--slate-600)' }}>Loading history...</p>
       </div>
     )
   }
 
   if (!loading && items.length === 0 && !filterType && !filterAction) {
     return (
-      <div className="text-center py-16 space-y-4">
-        <div className="text-6xl animate-float">📭</div>
-        <h3 className="text-xl font-bold text-green-800">No predictions yet</h3>
-        <p className="text-green-600/70 text-sm">Upload and analyze an item to see results here</p>
+      <div className="text-center py-20 space-y-4">
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto animate-float"
+          style={{ background: 'var(--slate-100)' }}
+        >
+          <Inbox className="w-8 h-8" style={{ color: 'var(--slate-400)' }} />
+        </div>
+        <h3 className="text-xl font-bold" style={{ color: 'var(--slate-800)', fontFamily: 'var(--font-jakarta)' }}>
+          No predictions yet
+        </h3>
+        <p className="text-sm" style={{ color: 'var(--slate-500)' }}>
+          Upload and analyze an item to see results here
+        </p>
         <Link
           href="/"
-          className="inline-block gradient-green text-white font-semibold px-6 py-3 rounded-xl shadow-lg"
+          className="btn-primary inline-flex"
+          style={{ borderRadius: '0.5rem' }}
         >
-          📷 Upload an Image
+          <Camera className="w-4 h-4" />
+          Upload an Image
         </Link>
       </div>
     )
@@ -105,23 +123,43 @@ export default function HistoryView() {
   return (
     <div className="space-y-5">
       {/* Search + Filter bar */}
-      <div className="glass-card rounded-2xl p-4 flex flex-col sm:flex-row gap-3">
+      <div
+        className="card-premium p-4 flex flex-col sm:flex-row gap-3"
+        style={{ borderRadius: '1rem' }}
+      >
         <div className="relative flex-1">
-          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-green-400 text-sm">🔍</span>
+          <Search
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4"
+            style={{ color: 'var(--slate-400)' }}
+          />
           <input
             id="history-search"
             type="text"
             placeholder="Search by type, condition, or recommendation..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-green-200 text-sm text-green-800 placeholder-green-400 focus:outline-none focus:ring-2 focus:ring-green-400/30 focus:border-green-400 bg-white"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl border text-sm placeholder-slate-400 outline-none transition-all"
+            style={{
+              border: '1px solid var(--slate-200)',
+              color: 'var(--slate-800)',
+              background: '#fff',
+            }}
+            onFocus={(e) => { e.target.style.borderColor = 'var(--emerald-700)'; e.target.style.boxShadow = '0 0 0 2px rgba(45,106,79,0.12)' }}
+            onBlur={(e) => { e.target.style.borderColor = 'var(--slate-200)'; e.target.style.boxShadow = 'none' }}
           />
         </div>
         <select
           id="filter-type"
           value={filterType}
           onChange={(e) => { setFilterType(e.target.value); setPage(1) }}
-          className="px-3 py-2.5 rounded-xl border border-green-200 text-sm text-green-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-400/30"
+          className="px-3 py-2.5 rounded-xl border text-sm outline-none transition-all"
+          style={{
+            border: '1px solid var(--slate-200)',
+            color: 'var(--slate-700)',
+            background: '#fff',
+          }}
+          onFocus={(e) => { e.target.style.borderColor = 'var(--emerald-700)'; e.target.style.boxShadow = '0 0 0 2px rgba(45,106,79,0.12)' }}
+          onBlur={(e) => { e.target.style.borderColor = 'var(--slate-200)'; e.target.style.boxShadow = 'none' }}
         >
           <option value="">All Types</option>
           {ITEM_TYPES.map((t) => (
@@ -132,7 +170,14 @@ export default function HistoryView() {
           id="filter-action"
           value={filterAction}
           onChange={(e) => { setFilterAction(e.target.value); setPage(1) }}
-          className="px-3 py-2.5 rounded-xl border border-green-200 text-sm text-green-800 bg-white focus:outline-none focus:ring-2 focus:ring-green-400/30"
+          className="px-3 py-2.5 rounded-xl border text-sm outline-none transition-all"
+          style={{
+            border: '1px solid var(--slate-200)',
+            color: 'var(--slate-700)',
+            background: '#fff',
+          }}
+          onFocus={(e) => { e.target.style.borderColor = 'var(--emerald-700)'; e.target.style.boxShadow = '0 0 0 2px rgba(45,106,79,0.12)' }}
+          onBlur={(e) => { e.target.style.borderColor = 'var(--slate-200)'; e.target.style.boxShadow = 'none' }}
         >
           <option value="">All Actions</option>
           {['reuse', 'repair', 'donate', 'dismantle', 'dispose', 'manual_review'].map((a) => (
@@ -142,7 +187,8 @@ export default function HistoryView() {
         {(filterType || filterAction || search) && (
           <button
             onClick={() => { setFilterType(''); setFilterAction(''); setSearch('') }}
-            className="px-3 py-2.5 rounded-xl border border-red-200 text-red-600 text-sm font-medium hover:bg-red-50 transition-colors"
+            className="px-3 py-2.5 rounded-xl border text-sm font-medium transition-colors"
+            style={{ border: '1px solid #FECACA', color: '#B91C1C', background: '#FFF' }}
           >
             Clear
           </button>
@@ -151,12 +197,16 @@ export default function HistoryView() {
 
       {/* Count */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-green-700/60">
-          Showing <span className="font-semibold text-green-700">{displayItems.length}</span> of{' '}
-          <span className="font-semibold text-green-700">{total}</span> predictions
+        <p className="text-sm" style={{ color: 'var(--slate-500)' }}>
+          Showing <span className="font-semibold" style={{ color: 'var(--slate-800)' }}>{displayItems.length}</span> of{' '}
+          <span className="font-semibold" style={{ color: 'var(--slate-800)' }}>{total}</span> predictions
         </p>
-        <Link href="/" className="text-sm font-medium text-green-600 hover:text-green-700">
-          + Analyze new item
+        <Link
+          href="/"
+          className="text-sm font-medium transition-colors flex items-center gap-1"
+          style={{ color: 'var(--emerald-700)' }}
+        >
+          <Camera className="w-3.5 h-3.5" /> Analyze new item
         </Link>
       </div>
 
@@ -166,11 +216,11 @@ export default function HistoryView() {
           {displayItems.map((item, i) => (
             <div
               key={item.id}
-              className="glass-card rounded-2xl overflow-hidden hover:-translate-y-1 transition-all duration-200 animate-fadeInUp"
-              style={{ animationDelay: `${i * 50}ms` }}
+              className="card-premium overflow-hidden animate-fadeInUp"
+              style={{ animationDelay: `${i * 50}ms`, borderRadius: '1rem' }}
             >
               {/* Image */}
-              <div className="relative aspect-video bg-green-50">
+              <div className="relative aspect-video" style={{ background: 'var(--slate-50)' }}>
                 {item.imageUrl && item.imageUrl !== '' ? (
                   <Image
                     src={item.imageUrl}
@@ -181,7 +231,9 @@ export default function HistoryView() {
                     onError={() => {}}
                   />
                 ) : (
-                  <div className="flex items-center justify-center h-full text-4xl text-green-200">🗃️</div>
+                  <div className="flex items-center justify-center h-full">
+                    <FileText className="w-10 h-10" style={{ color: 'var(--slate-300)' }} />
+                  </div>
                 )}
                 <div className="absolute top-2 right-2">
                   <ActionBadge action={item.action} />
@@ -191,19 +243,28 @@ export default function HistoryView() {
               {/* Info */}
               <div className="p-4 space-y-2.5">
                 <div className="flex items-start justify-between gap-2">
-                  <h4 className="font-bold text-green-800 text-sm leading-tight">
+                  <h4
+                    className="font-bold text-sm leading-tight"
+                    style={{ color: 'var(--slate-900)', fontFamily: 'var(--font-jakarta)' }}
+                  >
                     {formatItemType(item.itemType)}
                   </h4>
                   <span
-                    className={`badge text-xs flex-shrink-0 ${
-                      item.hazard ? 'bg-red-100 text-red-600' : 'bg-green-100 text-green-600'
-                    }`}
+                    className="badge text-xs flex-shrink-0"
+                    style={
+                      item.hazard
+                        ? { background: '#FEE2E2', color: '#B91C1C' }
+                        : { background: 'var(--emerald-50)', color: 'var(--emerald-700)' }
+                    }
                   >
-                    {item.hazard ? '⚠️' : '✅'}
+                    {item.hazard
+                      ? <AlertTriangle className="w-3 h-3" />
+                      : <CheckCircle className="w-3 h-3" />
+                    }
                   </span>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-green-600/70">
+                <div className="flex items-center gap-2 text-xs" style={{ color: 'var(--slate-500)' }}>
                   <span>{formatCondition(item.condition)}</span>
                   <span>·</span>
                   <span>{item.confidence}% confidence</span>
@@ -212,22 +273,24 @@ export default function HistoryView() {
                 {/* Reuse Score */}
                 {typeof item.reuseScore === 'number' && (
                   <div className="space-y-0.5">
-                    <p className="text-xs text-green-600/50 font-medium">Reuse Score</p>
+                    <p className="text-xs font-medium" style={{ color: 'var(--slate-400)' }}>Reuse Score</p>
                     <ReuseScoreMini score={item.reuseScore} />
                   </div>
                 )}
 
-                <p className="text-xs text-green-700/60 line-clamp-2">{item.recommendation}</p>
+                <p className="text-xs line-clamp-2" style={{ color: 'var(--slate-500)' }}>{item.recommendation}</p>
 
                 <div className="flex items-center justify-between pt-1">
-                  <p className="text-xs text-green-500/50">
+                  <p className="text-xs" style={{ color: 'var(--slate-400)' }}>
                     {new Date(item.createdAt).toLocaleString()}
                   </p>
                   <Link
                     href={`/passport/${item.id}`}
-                    className="text-xs font-semibold text-green-600 hover:text-green-700 bg-green-50 hover:bg-green-100 px-2 py-1 rounded-lg transition-colors"
+                    className="text-xs font-semibold flex items-center gap-1 px-2 py-1 rounded-lg transition-colors"
+                    style={{ color: 'var(--emerald-700)', background: 'var(--emerald-50)' }}
                   >
-                    🌿 Passport
+                    <FileText className="w-3 h-3" />
+                    Passport
                   </Link>
                 </div>
               </div>
@@ -235,9 +298,14 @@ export default function HistoryView() {
           ))}
         </div>
       ) : (
-        <div className="text-center py-12 text-green-600/60">
-          <div className="text-4xl mb-3">🔍</div>
-          <p className="font-medium">No results match your filters</p>
+        <div className="text-center py-14 space-y-3">
+          <div
+            className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto"
+            style={{ background: 'var(--slate-100)' }}
+          >
+            <SearchX className="w-7 h-7" style={{ color: 'var(--slate-400)' }} />
+          </div>
+          <p className="font-medium" style={{ color: 'var(--slate-600)' }}>No results match your filters</p>
         </div>
       )}
 
@@ -248,18 +316,24 @@ export default function HistoryView() {
             id="prev-page-btn"
             onClick={() => fetchHistory(page - 1)}
             disabled={page <= 1 || loading}
-            className="px-4 py-2 rounded-xl border border-green-200 text-sm font-medium text-green-700 hover:bg-green-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="btn-ghost px-3 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ borderRadius: '0.5rem' }}
           >
-            ← Previous
+            <ChevronLeft className="w-4 h-4" />
+            Previous
           </button>
-          <span className="text-sm text-green-700/60">Page {page} of {totalPages}</span>
+          <span className="text-sm px-2" style={{ color: 'var(--slate-500)' }}>
+            Page {page} of {totalPages}
+          </span>
           <button
             id="next-page-btn"
             onClick={() => fetchHistory(page + 1)}
             disabled={page >= totalPages || loading}
-            className="px-4 py-2 rounded-xl border border-green-200 text-sm font-medium text-green-700 hover:bg-green-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            className="btn-ghost px-3 py-2 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{ borderRadius: '0.5rem' }}
           >
-            Next →
+            Next
+            <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       )}

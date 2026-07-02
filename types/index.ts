@@ -23,6 +23,10 @@ export type Action =
   | 'manual_review'
 
 export interface GeminiAnalysis {
+  /** true if the image contains a waste/trash item that can be analyzed */
+  isWaste: boolean
+  /** Human-readable reason if isWaste is false */
+  notWasteReason?: string
   type: ItemType
   condition: Condition
   confidence: number
@@ -45,6 +49,10 @@ export interface AnalysisResult {
   action: Action
   recommendation: string
   createdAt: string
+  /** false when the uploaded image is not a waste/trash item */
+  isWaste?: boolean
+  /** Explanation shown when isWaste is false */
+  notWasteReason?: string
 }
 
 export interface FeedbackRecord {

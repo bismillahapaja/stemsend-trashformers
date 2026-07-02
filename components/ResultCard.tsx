@@ -7,6 +7,10 @@ import type { AnalysisResult, Action } from '@/types'
 import { formatAction, formatCondition, formatItemType, getActionColor } from '@/lib/rules'
 import ReuseScoreGauge from './ReuseScoreGauge'
 import FeedbackPanel from './FeedbackPanel'
+import {
+  Search, BrainCircuit, Lightbulb, Recycle, AlertTriangle, Info,
+  CheckCircle, Camera, FileText, Clock, ImageOff, Ban,
+} from 'lucide-react'
 
 // SVG circular confidence arc
 function CircularConfidence({ value }: { value: number }) {
@@ -15,7 +19,7 @@ function CircularConfidence({ value }: { value: number }) {
   const radius = (size - stroke) / 2
   const circumference = 2 * Math.PI * radius
   const progress = ((100 - value) / 100) * circumference
-  const color = value >= 75 ? '#22c55e' : value >= 50 ? '#f59e0b' : '#ef4444'
+  const color = value >= 75 ? '#2D6A4F' : value >= 50 ? '#d97706' : '#ef4444'
   const level = value >= 75 ? 'High' : value >= 50 ? 'Medium' : 'Low'
 
   return (
@@ -24,7 +28,7 @@ function CircularConfidence({ value }: { value: number }) {
         <svg width={size} height={size} className="-rotate-90">
           <circle
             cx={size / 2} cy={size / 2} r={radius}
-            fill="none" stroke="#dcfce7" strokeWidth={stroke}
+            fill="none" stroke="var(--slate-100)" strokeWidth={stroke}
           />
           <circle
             cx={size / 2} cy={size / 2} r={radius}
@@ -48,11 +52,14 @@ function CircularConfidence({ value }: { value: number }) {
 
 function InfoRow({ label, value, accent }: { label: string; value: string; accent?: string }) {
   return (
-    <div className="flex items-start justify-between py-3 border-b border-green-50 last:border-0">
-      <span className="text-sm text-green-700/60 font-medium">{label}</span>
+    <div
+      className="flex items-start justify-between py-3"
+      style={{ borderBottom: '1px solid var(--slate-100)' }}
+    >
+      <span className="text-sm font-medium" style={{ color: 'var(--slate-500)' }}>{label}</span>
       <span
         className="text-sm font-semibold text-right max-w-[60%]"
-        style={accent ? { color: accent } : { color: '#166534' }}
+        style={accent ? { color: accent } : { color: 'var(--forest-800)' }}
       >
         {value}
       </span>
@@ -97,16 +104,56 @@ export default function ResultCard() {
 
   if (!result) {
     return (
-      <div className="text-center py-16 space-y-4">
-        <div className="text-6xl animate-float">🔍</div>
-        <p className="text-green-800 font-semibold text-lg">No analysis result yet</p>
-        <p className="text-green-600/70 text-sm">Upload an image on the home page to get started</p>
+      <div className="text-center py-20 space-y-4">
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto animate-float"
+          style={{ background: 'var(--slate-100)' }}
+        >
+          <Search className="w-8 h-8" style={{ color: 'var(--slate-400)' }} />
+        </div>
+        <p className="font-bold text-lg" style={{ color: 'var(--slate-800)', fontFamily: 'var(--font-jakarta)' }}>
+          No analysis result yet
+        </p>
+        <p className="text-sm" style={{ color: 'var(--slate-500)' }}>
+          Upload an image on the home page to get started
+        </p>
         <Link
           href="/"
           id="go-upload-btn"
-          className="inline-block gradient-green text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all"
+          className="btn-primary inline-flex"
+          style={{ borderRadius: '0.5rem' }}
         >
+          <Camera className="w-4 h-4" />
           Upload an Image
+        </Link>
+      </div>
+    )
+  }
+
+  // Guard: non-waste items are handled in UploadZone itself (inline),
+  // but if one somehow ends up in sessionStorage, show a clear message here too.
+  if (result.isWaste === false) {
+    return (
+      <div className="text-center py-20 space-y-4">
+        <div
+          className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto"
+          style={{ background: '#FED7AA' }}
+        >
+          <Ban className="w-8 h-8" style={{ color: '#9A3412' }} />
+        </div>
+        <p className="font-bold text-xl" style={{ color: '#9A3412', fontFamily: 'var(--font-jakarta)' }}>
+          Bukan Item Sampah
+        </p>
+        <p className="text-sm max-w-md mx-auto" style={{ color: '#C2410C' }}>
+          {result.notWasteReason ?? 'Gambar yang diupload tidak terdeteksi sebagai sampah.'}
+        </p>
+        <Link
+          href="/"
+          className="btn-primary inline-flex"
+          style={{ borderRadius: '0.5rem', background: '#C2410C' }}
+        >
+          <Camera className="w-4 h-4" />
+          Upload Foto Sampah
         </Link>
       </div>
     )
@@ -120,8 +167,8 @@ export default function ResultCard() {
       {/* Row 1: Image + Details */}
       <div className="grid md:grid-cols-2 gap-6">
         {/* Image card */}
-        <div className="glass-card rounded-2xl overflow-hidden">
-          <div className="relative aspect-video bg-green-50">
+        <div className="card-premium overflow-hidden" style={{ borderRadius: '1rem' }}>
+          <div className="relative aspect-video" style={{ background: 'var(--slate-50)' }}>
             {result.imageUrl ? (
               <Image
                 src={result.imageUrl}
@@ -131,22 +178,35 @@ export default function ResultCard() {
                 sizes="(max-width: 768px) 100vw, 50vw"
               />
             ) : (
-              <div className="flex items-center justify-center h-full text-5xl text-green-200">🗃️</div>
+              <div className="flex items-center justify-center h-full">
+                <ImageOff className="w-12 h-12" style={{ color: 'var(--slate-300)' }} />
+              </div>
             )}
           </div>
-          <div className="px-4 py-3 flex items-center justify-between">
-            <span className="text-sm text-green-700/60 font-medium">Hazard Status</span>
+          <div
+            className="px-4 py-3 flex items-center justify-between"
+            style={{ borderTop: '1px solid var(--slate-100)' }}
+          >
+            <span className="text-sm font-medium" style={{ color: 'var(--slate-500)' }}>Hazard Status</span>
             <span
               id="hazard-badge"
-              className={`badge font-semibold ${result.hazard ? 'bg-red-100 text-red-700' : 'bg-green-100 text-green-700'}`}
+              className="badge font-semibold"
+              style={
+                result.hazard
+                  ? { background: '#FEE2E2', color: '#B91C1C' }
+                  : { background: 'var(--emerald-50)', color: 'var(--emerald-700)' }
+              }
             >
-              {result.hazard ? '⚠️ Hazardous' : '✅ No Hazard'}
+              {result.hazard
+                ? <><AlertTriangle className="w-3 h-3" /> Hazardous</>
+                : <><CheckCircle className="w-3 h-3" /> No Hazard</>
+              }
             </span>
           </div>
         </div>
 
         {/* Details card */}
-        <div className="glass-card rounded-2xl p-5 space-y-4">
+        <div className="card-premium p-5 space-y-4" style={{ borderRadius: '1rem' }}>
           {/* Action banner */}
           <div
             className="rounded-xl p-4 text-white text-center"
@@ -155,7 +215,9 @@ export default function ResultCard() {
             <p className="text-xs font-medium opacity-80 uppercase tracking-wide mb-1">
               Recommended Action
             </p>
-            <p id="action-label" className="text-2xl font-bold">{formatAction(result.action)}</p>
+            <p id="action-label" className="text-2xl font-bold" style={{ fontFamily: 'var(--font-jakarta)' }}>
+              {formatAction(result.action)}
+            </p>
           </div>
 
           {/* Info rows */}
@@ -165,7 +227,7 @@ export default function ResultCard() {
             <InfoRow
               label="AI Confidence"
               value={`${result.confidence >= 75 ? 'High' : result.confidence >= 50 ? 'Medium' : 'Low'}`}
-              accent={result.confidence >= 75 ? '#16a34a' : result.confidence >= 50 ? '#d97706' : '#dc2626'}
+              accent={result.confidence >= 75 ? '#2D6A4F' : result.confidence >= 50 ? '#d97706' : '#dc2626'}
             />
           </div>
 
@@ -179,33 +241,46 @@ export default function ResultCard() {
       {/* Row 2: Reuse Score + AI Explanation */}
       <div className="grid md:grid-cols-2 gap-6 mt-6">
         {/* Reuse Score */}
-        <div className="glass-card rounded-2xl p-6 flex flex-col items-center gap-3">
-          <h3 className="font-bold text-green-800 text-base self-start">♻️ Reuse Score</h3>
+        <div className="card-premium p-6 flex flex-col items-center gap-3" style={{ borderRadius: '1rem' }}>
+          <div className="flex items-center gap-2 self-start">
+            <Recycle className="w-4 h-4" style={{ color: 'var(--emerald-700)' }} />
+            <h3 className="font-bold text-base" style={{ color: 'var(--slate-900)', fontFamily: 'var(--font-jakarta)' }}>
+              Reuse Score
+            </h3>
+          </div>
           <ReuseScoreGauge score={result.reuseScore ?? 0} size={160} />
-          <p className="text-xs text-green-600/60 text-center max-w-[220px]">
+          <p className="text-xs text-center max-w-[220px]" style={{ color: 'var(--slate-500)' }}>
             Score reflects item type, condition, confidence level, and safety status.
           </p>
         </div>
 
         {/* AI Explanation */}
-        <div className="glass-card rounded-2xl p-6 space-y-3">
+        <div className="card-premium p-6 space-y-3" style={{ borderRadius: '1rem' }}>
           <div className="flex items-center gap-2">
-            <span className="text-xl">🤖</span>
-            <h3 className="font-bold text-green-800 text-base">AI Explanation</h3>
+            <BrainCircuit className="w-4 h-4" style={{ color: 'var(--emerald-700)' }} />
+            <h3 className="font-bold text-base" style={{ color: 'var(--slate-900)', fontFamily: 'var(--font-jakarta)' }}>
+              AI Explanation
+            </h3>
           </div>
-          <p id="recommendation-text" className="text-green-700 leading-relaxed text-sm">
+          <p id="recommendation-text" className="leading-relaxed text-sm" style={{ color: 'var(--slate-700)' }}>
             {explanation}
           </p>
           {result.confidence < 60 && (
-            <div className="rounded-xl bg-amber-50 border border-amber-200 px-4 py-3 text-sm text-amber-700 flex items-start gap-2">
-              <span>⚠️</span>
+            <div
+              className="rounded-xl px-4 py-3 text-sm flex items-start gap-2"
+              style={{ background: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E' }}
+            >
+              <AlertTriangle className="w-4 h-4 flex-shrink-0 mt-0.5" />
               <span>
                 AI confidence is below 60%. A <strong>human review</strong> is recommended before any action.
               </span>
             </div>
           )}
-          <div className="rounded-xl bg-green-50 border border-green-100 px-4 py-3 text-xs text-green-700 flex items-start gap-2">
-            <span>ℹ️</span>
+          <div
+            className="rounded-xl px-4 py-3 text-xs flex items-start gap-2"
+            style={{ background: 'var(--emerald-50)', border: '1px solid var(--emerald-100)', color: 'var(--emerald-700)' }}
+          >
+            <Info className="w-3.5 h-3.5 flex-shrink-0 mt-0.5" />
             <span>
               This is an AI-generated recommendation. Humans are responsible for final decisions.
             </span>
@@ -214,12 +289,14 @@ export default function ResultCard() {
       </div>
 
       {/* Row 3: Recommendation */}
-      <div className="glass-card rounded-2xl p-6 mt-6 space-y-2">
+      <div className="card-premium p-6 mt-6 space-y-2" style={{ borderRadius: '1rem' }}>
         <div className="flex items-center gap-2 mb-3">
-          <span className="text-2xl">💡</span>
-          <h3 className="font-bold text-green-800 text-lg">Recommendation</h3>
+          <Lightbulb className="w-5 h-5" style={{ color: 'var(--emerald-700)' }} />
+          <h3 className="font-bold text-lg" style={{ color: 'var(--slate-900)', fontFamily: 'var(--font-jakarta)' }}>
+            Recommendation
+          </h3>
         </div>
-        <p className="text-green-700 leading-relaxed">{result.recommendation}</p>
+        <p className="leading-relaxed" style={{ color: 'var(--slate-700)' }}>{result.recommendation}</p>
       </div>
 
       {/* Row 4: Human Feedback */}
@@ -232,23 +309,29 @@ export default function ResultCard() {
         <Link
           href="/"
           id="analyze-another-btn"
-          className="gradient-green text-white font-semibold px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5"
+          className="btn-primary"
+          style={{ borderRadius: '0.5rem' }}
         >
-          📷 Analyze Another Item
+          <Camera className="w-4 h-4" />
+          Analyze Another Item
         </Link>
         <Link
           href={`/passport/${result.id}`}
           id="view-passport-btn"
-          className="bg-white text-green-700 font-semibold px-6 py-3 rounded-xl border border-green-200 hover:bg-green-50 transition-all"
+          className="btn-ghost"
+          style={{ borderRadius: '0.5rem' }}
         >
-          🌿 View Passport
+          <FileText className="w-4 h-4" />
+          View Passport
         </Link>
         <Link
           href="/history"
           id="view-history-btn"
-          className="bg-white text-green-700 font-semibold px-6 py-3 rounded-xl border border-green-200 hover:bg-green-50 transition-all"
+          className="btn-ghost"
+          style={{ borderRadius: '0.5rem' }}
         >
-          🗂️ View History
+          <Clock className="w-4 h-4" />
+          View History
         </Link>
       </div>
     </div>

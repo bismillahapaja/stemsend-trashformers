@@ -32,6 +32,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
       )
     }
 
+    // ── Non-waste detection ───────────────────────────────────────────────
+    // If Gemini determined the image is NOT a waste item, return early
+    // without persisting anything to the database.
+    if (analysis.isWaste === false) {
+      return NextResponse.json(
+        {
+          isWaste: false,
+          notWasteReason: analysis.notWasteReason ??
+            'The uploaded image does not appear to contain a waste or trash item.',
+          imageUrl: imageUrl ?? '',
+        },
+        { status: 422 }
+      )
+    }
+    // ─────────────────────────────────────────────────────────────────────
+
     // Apply rule engine
     const ruleResult = applyRule(analysis.type, analysis.condition)
 
@@ -72,6 +88,7 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
     })
 
     return NextResponse.json({
+      isWaste: true,
       id: prediction.id,
       imageUrl: prediction.imageUrl,
       itemType: prediction.itemType,

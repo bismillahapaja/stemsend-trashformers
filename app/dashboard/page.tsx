@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import DashboardView from '@/components/DashboardView'
+import { BarChart3 } from 'lucide-react'
 
 export const metadata: Metadata = {
   title: 'Dashboard — Waste Analytics',
@@ -8,13 +9,22 @@ export const metadata: Metadata = {
 
 export default function DashboardPage() {
   return (
-    <div className="max-w-6xl mx-auto px-4 py-10 space-y-8">
+    <div className="max-w-6xl mx-auto px-6 py-20 space-y-8">
       <div className="space-y-2">
-        <div className="inline-flex items-center gap-2 bg-green-100 text-green-700 text-sm font-semibold px-3 py-1.5 rounded-full">
-          📊 School Analytics
+        <div
+          className="inline-flex items-center gap-2 text-sm font-semibold px-3 py-1.5 rounded-full"
+          style={{ background: 'var(--emerald-50)', color: 'var(--forest-800)', border: '1px solid var(--emerald-100)' }}
+        >
+          <BarChart3 className="w-3.5 h-3.5" />
+          School Analytics
         </div>
-        <h1 className="text-3xl font-bold text-green-900">Waste Management Dashboard</h1>
-        <p className="text-green-700/60">
+        <h1
+          className="text-3xl font-bold"
+          style={{ color: 'var(--slate-950)', fontFamily: 'var(--font-jakarta)' }}
+        >
+          Waste Management Dashboard
+        </h1>
+        <p style={{ color: 'var(--slate-600)' }}>
           Track your school&apos;s circular economy impact in real time.
         </p>
       </div>
