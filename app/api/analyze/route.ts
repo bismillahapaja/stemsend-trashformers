@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { analyzeImageWithGemini } from '@/lib/gemini'
 import { applyRule, calculateReuseScore } from '@/lib/rules'
 import { prisma } from '@/lib/prisma'
+import { trimHistoryToCapacity } from '@/lib/history'
 
 export async function POST(request: NextRequest): Promise<NextResponse> {
   try {
@@ -86,6 +87,11 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
         recommendation: finalRecommendation,
       },
     })
+
+    // Auto-trim history to the latest 30 records (fire-and-forget)
+    trimHistoryToCapacity().catch((e) =>
+      console.warn('[analyze] History trim failed:', e)
+    )
 
     return NextResponse.json({
       isWaste: true,
